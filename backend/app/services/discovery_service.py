@@ -135,19 +135,27 @@ class DiscoveryService:
                 
                 # Calculate statistics
                 unique_authors = set()
+                unique_datasets = set()
+                unique_methods = set()
                 citations = 0
-                for p in ranked:
-                    citations += p.get("citation_count", 0)
+                for p in sanitized_ranked:
+                    citations += p.get("citation_count", 0) or 0
                     for author in p.get("authors", []):
                         author_name = author.get("name") if isinstance(author, dict) else author
                         if author_name:
                             unique_authors.add(author_name)
+                    for ds in p.get("datasets", []):
+                        if ds:
+                            unique_datasets.add(ds if isinstance(ds, str) else ds.get("name", ""))
+                    for m in p.get("methods", []):
+                        if m:
+                            unique_methods.add(m if isinstance(m, str) else m.get("name", ""))
                             
                 stats = {
-                    "papers": len(ranked),
+                    "papers": len(sanitized_ranked),
                     "authors": len(unique_authors),
-                    "datasets": 0,
-                    "methods": 0,
+                    "datasets": len(unique_datasets),
+                    "methods": len(unique_methods),
                     "citations": citations
                 }
                 

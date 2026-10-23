@@ -37,15 +37,46 @@ class WorkspaceService:
 
         return workspace.model_dump(by_alias=True)
 
+    async def _fix_stats_if_needed(self, ws_dict: dict, workspace_id: str) -> dict:
+        stats = ws_dict.get("statistics") or {}
+        if stats.get("datasets", 0) == 0 or stats.get("methods", 0) == 0:
+            from app.models.paper import Paper
+            papers = await Paper.find(Paper.workspace_id == workspace_id).to_list()
+            if papers:
+                datasets = set()
+                methods = set()
+                for p in papers:
+                    for ds in getattr(p, "datasets", []) or []:
+                        if ds:
+                            datasets.add(ds if isinstance(ds, str) else ds.get("name", ""))
+                    for m in getattr(p, "methods", []) or []:
+                        if m:
+                            methods.add(m if isinstance(m, str) else m.get("name", ""))
+                if datasets or methods:
+                    stats["datasets"] = len(datasets)
+                    stats["methods"] = len(methods)
+                    ws_dict["statistics"] = stats
+                    try:
+                        await self.workspace_repo.update_workspace(workspace_id, {"statistics": stats})
+                    except Exception:
+                        pass
+        return ws_dict
+
     async def get_workspace(self, workspace_id: str) -> Optional[dict]:
         workspace = await self.workspace_repo.get_workspace(workspace_id)
         if not workspace:
             return None
-        return workspace.model_dump(by_alias=True)
+        ws_dict = workspace.model_dump(by_alias=True)
+        return await self._fix_stats_if_needed(ws_dict, workspace_id)
 
     async def get_user_workspaces(self, user_id: str) -> list:
         workspaces = await self.workspace_repo.get_user_workspaces(user_id)
-        return [w.model_dump(by_alias=True) for w in workspaces]
+        results = []
+        for w in workspaces:
+            ws_dict = w.model_dump(by_alias=True)
+            fixed_ws = await self._fix_stats_if_needed(ws_dict, str(w.id))
+            results.append(fixed_ws)
+        return results
 
     async def update_workspace(self, workspace_id: str, data: dict) -> Optional[dict]:
         data["updated_at"] = datetime.utcnow()
