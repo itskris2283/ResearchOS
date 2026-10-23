@@ -295,26 +295,22 @@ class PaperService:
     async def deduplicate(self, papers: list) -> list:
         unique = []
         seen_dois = set()
-        seen_titles = []
+        seen_titles = set()
         for paper in papers:
-            doi = paper.get("doi")
+            doi = (paper.get("doi") or "").strip().lower()
             if doi and doi in seen_dois:
                 continue
             if doi:
                 seen_dois.add(doi)
-            title = (paper.get("title") or "").lower().strip()
-            if not title:
+            raw_title = paper.get("title") or ""
+            clean_title = "".join(c for c in raw_title.lower() if c.isalnum() or c.isspace()).strip()
+            if not clean_title:
                 unique.append(paper)
                 continue
-            duplicate = False
-            for existing_title in seen_titles:
-                ratio = SequenceMatcher(None, title, existing_title).ratio()
-                if ratio > 0.85:
-                    duplicate = True
-                    break
-            if not duplicate:
-                seen_titles.append(title)
-                unique.append(paper)
+            if clean_title in seen_titles:
+                continue
+            seen_titles.add(clean_title)
+            unique.append(paper)
         logger.info(f"Deduplicated {len(papers)} -> {len(unique)} papers")
         return unique
 

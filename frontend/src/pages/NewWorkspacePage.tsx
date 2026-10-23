@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Loader2, Search, Sparkles, Database, Network, BookOpen, Zap, CheckCircle } from "lucide-react";
@@ -31,14 +31,26 @@ const stageLabels: Record<string, { label: string; icon: React.ReactNode }> = {
 
 function LoadingScreen({ workspaceId, onComplete }: { workspaceId: string; onComplete: () => void }) {
   const { data, isLoading, isError } = useWorkspaceProgress(workspaceId, true);
+  const [showSkip, setShowSkip] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSkip(true), 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const progress = data?.data?.progress ?? 0;
   const stage = data?.data?.stage ?? "query_expansion";
   const stageInfo = stageLabels[stage] ?? { label: "Processing…", icon: <Loader2 className="h-4 w-4 animate-spin" /> };
 
   const isReady = stage === "ready" || (stage === "complete" && progress >= 100);
 
+  useEffect(() => {
+    if (isReady) {
+      onComplete();
+    }
+  }, [isReady, onComplete]);
+
   if (isReady) {
-    onComplete();
     return null;
   }
 
@@ -109,9 +121,24 @@ function LoadingScreen({ workspaceId, onComplete }: { workspaceId: string; onCom
             })}
           </div>
 
-          <div className="pt-4 border-t flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" />
-            <span>This usually takes 30–60 seconds</span>
+          <div className="pt-4 border-t flex flex-col items-center justify-center gap-2">
+            {showSkip || isError ? (
+              <motion.button
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                type="button"
+                onClick={onComplete}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md cursor-pointer"
+              >
+                <span>Enter Workspace Now</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </motion.button>
+            ) : (
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span>Building research graphs...</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
