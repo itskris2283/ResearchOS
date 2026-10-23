@@ -136,9 +136,15 @@ export default function NewWorkspacePage() {
         topic: topic.trim(),
         title: title.trim() || topic.trim(),
       });
-      setCreatedWorkspaceId(result.data._id);
-    } catch {
-      toast.error("Could not create the workspace. Try again.");
+      const wsId = result.data?._id || (result.data as any)?.id;
+      if (wsId) {
+        setCreatedWorkspaceId(wsId);
+      } else {
+        throw new Error("Invalid workspace response");
+      }
+    } catch (err: any) {
+      console.error("Workspace creation failed:", err);
+      toast.error(err?.message || "Could not create the workspace. Try again.");
     }
   };
 

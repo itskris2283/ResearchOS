@@ -66,35 +66,35 @@ from app.api import (
     compare,
 )
 
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-app.include_router(workspaces.router, prefix="/api/v1/workspaces", tags=["Workspaces"])
-app.include_router(papers.router, prefix="/api/v1/papers", tags=["Papers"])
-app.include_router(authors.router, prefix="/api/v1/authors", tags=["Authors"])
-app.include_router(datasets.router, prefix="/api/v1/datasets", tags=["Datasets"])
-app.include_router(graph.router, prefix="/api/v1/graph", tags=["Knowledge Graph"])
-app.include_router(timeline.router, prefix="/api/v1/timeline", tags=["Timeline"])
-app.include_router(review.router, prefix="/api/v1/review", tags=["Literature Review"])
-app.include_router(roadmap.router, prefix="/api/v1/roadmap", tags=["Roadmap"])
-app.include_router(assistant.router, prefix="/api/v1/assistant", tags=["AI Assistant"])
-app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
-app.include_router(discovery.router, prefix="/api/v1/discovery", tags=["Discovery"])
-app.include_router(concepts.router, prefix="/api/v1/concepts", tags=["Concepts"])
-app.include_router(
-    implementations.router, prefix="/api/v1/implementations", tags=["Implementations"]
-)
-app.include_router(benchmark.router, prefix="/api/v1/benchmarks", tags=["Benchmarks"])
-app.include_router(
-    institutions.router, prefix="/api/v1/institutions", tags=["Institutions"]
-)
-app.include_router(
-    hypothesis.router, prefix="/api/v1/hypothesis", tags=["Hypothesis Lab"]
-)
-app.include_router(sessions.router, prefix="/api/v1/sessions", tags=["Sessions"])
-app.include_router(search.router, prefix="/api/v1/search", tags=["Search"])
-app.include_router(bookmarks.router, prefix="/api/v1/bookmarks", tags=["Bookmarks"])
-app.include_router(notes.router, prefix="/api/v1/notes", tags=["Notes"])
-app.include_router(export.router, prefix="/api/v1/export", tags=["Export"])
-app.include_router(compare.router, prefix="/api/v1/compare", tags=["Compare"])
+_routers = [
+    (auth.router, "/auth", ["Authentication"]),
+    (workspaces.router, "/workspaces", ["Workspaces"]),
+    (papers.router, "/papers", ["Papers"]),
+    (authors.router, "/authors", ["Authors"]),
+    (datasets.router, "/datasets", ["Datasets"]),
+    (graph.router, "/graph", ["Knowledge Graph"]),
+    (timeline.router, "/timeline", ["Timeline"]),
+    (review.router, "/review", ["Literature Review"]),
+    (roadmap.router, "/roadmap", ["Roadmap"]),
+    (assistant.router, "/assistant", ["AI Assistant"]),
+    (analytics.router, "/analytics", ["Analytics"]),
+    (discovery.router, "/discovery", ["Discovery"]),
+    (concepts.router, "/concepts", ["Concepts"]),
+    (implementations.router, "/implementations", ["Implementations"]),
+    (benchmark.router, "/benchmarks", ["Benchmarks"]),
+    (institutions.router, "/institutions", ["Institutions"]),
+    (hypothesis.router, "/hypothesis", ["Hypothesis Lab"]),
+    (sessions.router, "/sessions", ["Sessions"]),
+    (search.router, "/search", ["Search"]),
+    (bookmarks.router, "/bookmarks", ["Bookmarks"]),
+    (notes.router, "/notes", ["Notes"]),
+    (export.router, "/export", ["Export"]),
+    (compare.router, "/compare", ["Compare"]),
+]
+
+for r, path, tags in _routers:
+    app.include_router(r, prefix=f"/api/v1{path}", tags=tags)
+    app.include_router(r, prefix=path, tags=tags, include_in_schema=False)
 
 
 @app.get("/")
