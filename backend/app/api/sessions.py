@@ -1,11 +1,29 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.services.session_service import SessionService
 
+from typing import Optional
+
 router = APIRouter()
 
 
 async def get_session_service():
     return SessionService()
+
+
+@router.get("/")
+async def list_sessions_query(
+    workspace_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    service: SessionService = Depends(get_session_service),
+):
+    try:
+        if workspace_id:
+            result = await service.get_workspace_sessions(workspace_id)
+        else:
+            result = []
+        return {"status": "success", "message": "Sessions retrieved", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{workspace_id}")

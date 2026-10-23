@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Body
 from app.services.note_service import NoteService
 
@@ -6,6 +7,18 @@ router = APIRouter()
 
 async def get_note_service():
     return NoteService()
+
+
+@router.get("/")
+async def list_notes_query(
+    workspace_id: Optional[str] = None,
+    service: NoteService = Depends(get_note_service),
+):
+    try:
+        result = await service.get_workspace_notes(workspace_id or "")
+        return {"status": "success", "message": "Notes retrieved", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{workspace_id}")
@@ -19,15 +32,20 @@ async def list_notes(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+from pydantic import BaseModel
+
+class CreateNoteRequest(BaseModel):
+    workspace_id: str
+    title: str
+    content: Optional[str] = ""
+
 @router.post("/")
 async def create_note(
-    workspace_id: str = Body(...),
-    title: str = Body(...),
-    content: str = Body(""),
+    body: CreateNoteRequest,
     service: NoteService = Depends(get_note_service),
 ):
     try:
-        note = await service.create_note(workspace_id, title, content)
+        note = await service.create_note(body.workspace_id, body.title, body.content or "")
         return {"status": "success", "message": "Note created", "data": note}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

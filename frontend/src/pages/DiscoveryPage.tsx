@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/tabs";
 import { useDiscoverySearch } from "@/hooks/useDiscovery";
 import { useWorkspace } from "@/contexts/WorkspaceContext";
+import type { Paper, AuthorBrief } from "@/types";
 
 export default function DiscoveryPage() {
   const [query, setQuery] = useState("");
@@ -38,7 +39,8 @@ export default function DiscoveryPage() {
   const { currentWorkspace } = useWorkspace();
   const discoveryMutation = useDiscoverySearch();
 
-  const papers = discoveryMutation.data?.data ?? [];
+  const rawData = discoveryMutation.data?.data;
+  const papers: Paper[] = (Array.isArray(rawData) ? rawData : (rawData as any)?.papers ?? []) as Paper[];
 
   const handleSearch = () => {
     if (!query.trim()) return;
@@ -112,7 +114,7 @@ export default function DiscoveryPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold leading-snug group-hover:text-primary transition-colors">{paper.title}</h3>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {paper.authors?.map((a) => a.name).join(", ") ?? "Unknown authors"}
+                          {paper.authors?.map((a: AuthorBrief) => a.name).join(", ") ?? "Unknown authors"}
                         </p>
                         <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
                           {paper.year && <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {paper.year}</span>}
@@ -121,8 +123,8 @@ export default function DiscoveryPage() {
                         </div>
                         {paper.abstract && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{paper.abstract}</p>}
                         <div className="mt-3 flex flex-wrap gap-1.5">
-                          {paper.methods?.slice(0, 3).map((m) => <Badge key={m} variant="secondary" className="text-xs">{m}</Badge>)}
-                          {paper.datasets?.slice(0, 2).map((d) => <Badge key={d} variant="outline" className="text-xs">{d}</Badge>)}
+                          {paper.methods?.slice(0, 3).map((m: string) => <Badge key={m} variant="secondary" className="text-xs">{m}</Badge>)}
+                          {paper.datasets?.slice(0, 2).map((d: string) => <Badge key={d} variant="outline" className="text-xs">{d}</Badge>)}
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-2 shrink-0">

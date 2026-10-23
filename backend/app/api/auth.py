@@ -1,7 +1,20 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from pydantic import BaseModel
+from typing import Optional
 from app.services.auth_service import AuthService
 
 router = APIRouter()
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
 
 
 async def get_auth_service():
@@ -10,10 +23,10 @@ async def get_auth_service():
 
 @router.post("/login")
 async def login(
-    email: str, password: str, service: AuthService = Depends(get_auth_service)
+    body: LoginRequest, service: AuthService = Depends(get_auth_service)
 ):
     try:
-        result = await service.login(email, password)
+        result = await service.login(body.email, body.password)
         return {"status": "success", "message": "Login successful", "data": result}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
@@ -21,13 +34,11 @@ async def login(
 
 @router.post("/register")
 async def register(
-    email: str,
-    password: str,
-    name: str,
+    body: RegisterRequest,
     service: AuthService = Depends(get_auth_service),
 ):
     try:
-        result = await service.register(email, password, name)
+        result = await service.register(body.email, body.password, body.name)
         return {
             "status": "success",
             "message": "Registration successful",
@@ -38,9 +49,9 @@ async def register(
 
 
 @router.get("/me")
-async def get_me(user_id: str, service: AuthService = Depends(get_auth_service)):
+async def get_me(user_id: Optional[str] = Query("guest"), service: AuthService = Depends(get_auth_service)):
     try:
-        result = await service.get_current_user(user_id)
+        result = await service.get_current_user(user_id or "guest")
         return {"status": "success", "message": "User info retrieved", "data": result}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))

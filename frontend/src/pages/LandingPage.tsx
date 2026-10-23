@@ -1,149 +1,335 @@
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Network,
-  Brain,
-  BookOpen,
-  Sparkles,
-  Compass,
-  Lightbulb,
-  BarChart3,
-} from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, MotionConfig } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const REFERENCES = [
+  {
+    id: 1,
+    title: "Discovery",
+    body: "Queries arXiv, Semantic Scholar, OpenAlex, CrossRef and Papers With Code in parallel, deduplicates the overlap, and ranks what remains.",
+    meta: "5 sources · one query",
+  },
+  {
+    id: 2,
+    title: "Knowledge graph",
+    body: "Papers become nodes, citations become edges. Pull the map apart by venue, year or author, and export what you find.",
+    meta: "interactive · exportable",
+  },
+  {
+    id: 3,
+    title: "Literature review",
+    body: "A draft organised by theme, where every claim carries a link back to the paper it came from.",
+    meta: "citation-grounded",
+  },
+  {
+    id: 4,
+    title: "Gap finder",
+    body: "Clusters the questions your collected papers raise but none of them answer — the publishable intersections.",
+    meta: "underexplored territory",
+  },
+  {
+    id: 5,
+    title: "Timeline",
+    body: "Sets the field in order: when it accelerated, who drove it, and what changed after each inflection point.",
+    meta: "chronology",
+  },
+  {
+    id: 6,
+    title: "Datasets & benchmarks",
+    body: "Collects the code, datasets and benchmarks researchers ship alongside their papers.",
+    meta: "artifacts",
+  },
+];
+
+const METHOD = [
+  {
+    n: "01",
+    title: "Pose the question",
+    body: "Type any topic in plain language. \u201Cmicroplastics in agricultural soil\u201D works as well as \u201Ctransformer interpretability\u201D.",
+  },
+  {
+    n: "02",
+    title: "Let it read",
+    body: "Discovery runs across all five sources while the workspace fills with papers, authors, figures and code. No query syntax to learn.",
+  },
+  {
+    n: "03",
+    title: "Work the map",
+    body: "Filter, annotate, bookmark, export. Everything stays in the workspace between sessions — yours to keep.",
+  },
+];
+
+function Cite({
+  n,
+  active,
+  onActivate,
+}: {
+  n: number;
+  active: number | null;
+  onActivate: (n: number | null) => void;
+}) {
+  return (
+    <a
+      href={`#ref-${n}`}
+      onMouseEnter={() => onActivate(n)}
+      onMouseLeave={() => onActivate(null)}
+      onFocus={() => onActivate(n)}
+      onBlur={() => onActivate(null)}
+      aria-label={`Reference ${n}`}
+      className={cn(
+        "mx-0.5 inline-flex h-[1.05rem] min-w-[1.05rem] items-center justify-center rounded-[3px] px-1 align-super font-mono text-[10px] leading-none transition-colors duration-150",
+        active === n
+          ? "bg-highlight text-highlight-foreground"
+          : "text-stamp hover:bg-stamp/10"
+      )}
+    >
+      {n}
+    </a>
+  );
+}
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [activeRef, setActiveRef] = useState<number | null>(null);
 
-  const features = [
-    { icon: Network, title: "Knowledge Graphs", description: "Visualize research relationships interactively" },
-    { icon: Brain, title: "Mind Maps", description: "Understand concept hierarchies at a glance" },
-    { icon: BookOpen, title: "Literature Reviews", description: "Generate citation-grounded reviews automatically" },
-    { icon: Compass, title: "Research Discovery", description: "Find papers across 5+ scientific sources" },
-    { icon: Lightbulb, title: "Research Gaps", description: "Identify underexplored opportunities" },
-    { icon: BarChart3, title: "Research Analytics", description: "Understand field trends and velocities" },
+  const abstract: { text: string; cite?: number }[] = [
+    { text: "We present ResearchOS, a workspace that takes a single research question and returns the landscape around it. Given a topic, it queries five sources", cite: 1 },
+    { text: ", maps the results into a citation graph you can pull apart by hand", cite: 2 },
+    { text: ", drafts a literature review with every claim anchored to its source", cite: 3 },
+    { text: ", and marks the intersections nobody has published on yet", cite: 4 },
+    { text: ". A timeline" },
+    { text: " shows when the field moved and who moved it; datasets and benchmarks", cite: 5 },
+    { text: " stay attached to the papers they belong to", cite: 6 },
+    { text: ". Workspaces persist, so the second pass through a field starts where the first one ended." },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="glass fixed top-0 z-50 w-full border-b">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">R</span>
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-background text-foreground">
+        {/* ── Masthead ─────────────────────────────────────────── */}
+        <header className="glass fixed top-0 z-50 w-full border-b">
+          <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+            <Link to="/" className="font-serif text-[17px] font-semibold tracking-tight">
+              Research<span className="text-stamp">OS</span>.
+            </Link>
+            <div className="flex items-center gap-5">
+              <button
+                onClick={() => navigate("/app")}
+                className="font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => navigate("/app/new-workspace")}
+                className="rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Get started
+              </button>
             </div>
-            <span className="text-sm font-semibold">ResearchOS</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/app")}>
-              Sign In
-            </Button>
-            <Button size="sm" onClick={() => navigate("/app/new-workspace")}>
-              Get Started <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <main>
-        <section className="relative pt-32 pb-20">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-          <div className="mx-auto max-w-5xl px-6 text-center">
+        <main>
+          {/* ── § Abstract — the hero is a preprint ─────────────── */}
+          <section className="relative mx-auto max-w-6xl px-6 pt-32 pb-24 sm:pt-40">
+            {/* running head */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="mb-14 hidden items-baseline justify-between border-b border-border pb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:flex"
             >
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-xs font-medium text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                AI-Powered Research Operating System
-              </div>
-              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-balance">
-                The AI Operating System for{" "}
-                <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                  Scientific Discovery
-                </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground text-balance">
-                Go from "I have a research idea" to "I completely understand the research landscape."
-                ResearchOS automatically discovers papers, builds knowledge graphs, generates literature reviews,
-                and creates a permanent research workspace.
-              </p>
-              <div className="mt-8 flex items-center justify-center gap-4">
-                <Button size="lg" className="h-12 px-8 text-base" onClick={() => navigate("/app/new-workspace")}>
-                  Start Your First Workspace <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="lg" className="h-12 px-8 text-base">
-                  Watch Demo
-                </Button>
-              </div>
+              <span>Working paper Nº 001</span>
+              <span>Revised August 2026</span>
             </motion.div>
-          </div>
-        </section>
 
-        <section className="py-20">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold">Everything you need for research</h2>
-              <p className="mt-2 text-muted-foreground">
-                One platform to discover, understand, and connect research
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="glass-card group rounded-xl p-6 hover:shadow-md transition-all"
+            <div className="relative max-w-[44rem]">
+              {/* the stamp — the one risk this page takes */}
+              <motion.div
+                initial={{ opacity: 0, scale: 1.5, rotate: -14 }}
+                animate={{ opacity: 1, scale: 1, rotate: -6 }}
+                transition={{ delay: 0.7, type: "spring", stiffness: 320, damping: 16 }}
+                aria-hidden="true"
+                className="absolute -top-10 right-0 select-none rounded-sm border-2 border-stamp/70 px-3 py-1.5 text-center font-mono uppercase text-stamp/80 sm:-right-8 lg:-right-20"
+              >
+                <span className="block text-[13px] tracking-[0.22em]">Preprint</span>
+                <span className="mt-0.5 block text-[8px] tracking-[0.18em]">not peer reviewed</span>
+              </motion.div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="eyebrow mb-5"
+              >
+                § 1 · Abstract
+              </motion.p>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.15 }}
+                className="text-balance text-4xl leading-[1.08] sm:text-5xl lg:text-[3.4rem]"
+              >
+                One question in.
+                <br />
+                The entire field out.
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.35 }}
+                className="mt-5 font-mono text-xs tracking-wide text-muted-foreground"
+              >
+                The ResearchOS Working Group · preprint · v2.0
+              </motion.p>
+
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                className="mt-8 text-[15.5px] leading-[1.75] text-foreground/85"
+              >
+                {abstract.map((part, i) => (
+                  <span key={i}>
+                    {part.text}
+                    {part.cite && (
+                      <Cite n={part.cite} active={activeRef} onActivate={setActiveRef} />
+                    )}
+                  </span>
+                ))}
+              </motion.p>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.55 }}
+                className="mt-6 font-mono text-xs leading-relaxed text-muted-foreground"
+              >
+                <span className="italic">keywords:</span> discovery · citation graphs · literature
+                review · research gaps · timelines
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.65 }}
+                className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3"
+              >
+                <button
+                  onClick={() => navigate("/app/new-workspace")}
+                  className="group inline-flex h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <feature.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="mb-2 font-semibold">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </motion.div>
-              ))}
+                  Start your first workspace
+                  <span className="ml-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+                <a
+                  href="#references"
+                  className="font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-stamp"
+                >
+                  Read the references ↓
+                </a>
+              </motion.div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="border-t py-20">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <h2 className="text-3xl font-bold mb-4">How it works</h2>
-            <div className="grid gap-8 sm:grid-cols-3 mt-12">
-              {[
-                { step: "1", title: "Enter a Topic", desc: "Type any research area you're interested in" },
-                { step: "2", title: "AI Discovery", desc: "ResearchOS searches 5+ sources automatically" },
-                { step: "3", title: "Interactive Workspace", desc: "Explore graphs, reviews, and insights" },
-              ].map((item) => (
-                <div key={item.step}>
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-                    {item.step}
-                  </div>
-                  <h3 className="font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <footer className="border-t py-8">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/20">
-                <span className="text-xs font-bold text-primary">R</span>
+          {/* ── References — features as a bibliography ─────────── */}
+          <section id="references" className="border-t border-border">
+            <div className="mx-auto max-w-6xl px-6 py-24">
+              <div className="max-w-[44rem]">
+                <p className="eyebrow mb-5">§ 2 · References</p>
+                <h2 className="text-balance text-3xl leading-tight">
+                  What the workspace does with your question
+                </h2>
               </div>
-              <span className="text-sm text-muted-foreground">ResearchOS v2.0</span>
+
+              <ol className="mt-12 max-w-[52rem] space-y-px">
+                {REFERENCES.map((ref, i) => (
+                  <motion.li
+                    key={ref.id}
+                    id={`ref-${ref.id}`}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.4, delay: i * 0.04 }}
+                    onMouseEnter={() => setActiveRef(ref.id)}
+                    onMouseLeave={() => setActiveRef(null)}
+                    className={cn(
+                      "scroll-mt-28 flex flex-col gap-1 border-l-2 px-4 py-5 transition-colors duration-150 sm:flex-row sm:gap-6 sm:px-5",
+                      activeRef === ref.id
+                        ? "border-highlight bg-highlight/25"
+                        : "border-transparent hover:border-border"
+                    )}
+                  >
+                    <span className="w-8 shrink-0 pt-[3px] font-mono text-[13px] text-stamp">
+                      [{ref.id}]
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="inline font-serif text-[17px] italic">{ref.title}</h3>
+                      <span className="ml-3 hidden align-middle font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:inline">
+                        {ref.meta}
+                      </span>
+                      <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                        {ref.body}
+                      </p>
+                    </div>
+                  </motion.li>
+                ))}
+              </ol>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-muted-foreground">Built for researchers</span>
+          </section>
+
+          {/* ── Method ───────────────────────────────────────────── */}
+          <section className="border-t border-border bg-card">
+            <div className="mx-auto max-w-6xl px-6 py-24">
+              <p className="eyebrow mb-5">§ 3 · Method</p>
+              <h2 className="max-w-lg text-balance text-3xl leading-tight">
+                Three steps between you and the landscape
+              </h2>
+
+              <div className="mt-12 grid gap-px overflow-hidden border-y border-border md:grid-cols-3">
+                {METHOD.map((step) => (
+                  <div key={step.n} className="border-border px-0 py-2 md:px-6 md:first:pl-0 md:last:pr-0">
+                    <div className="flex h-full flex-col border-border md:border-l md:first:border-l-0 md:py-6">
+                      <span className="font-mono text-xs text-stamp">{step.n}</span>
+                      <h3 className="mt-3 text-lg">{step.title}</h3>
+                      <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
+                        {step.body}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-14 flex justify-center">
+                <button
+                  onClick={() => navigate("/app/new-workspace")}
+                  className="group inline-flex h-11 items-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Open ResearchOS
+                  <span className="ml-2 inline-block transition-transform duration-200 group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+              </div>
             </div>
+          </section>
+        </main>
+
+        {/* ── Colophon ─────────────────────────────────────────── */}
+        <footer className="border-t border-border">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              Research<span className="text-stamp">OS</span>. — set in STIX Two Text &amp; IBM Plex
+            </span>
+            <span>v2.0 · MMXXVI</span>
           </div>
         </footer>
-      </main>
-    </div>
+      </div>
+    </MotionConfig>
   );
 }

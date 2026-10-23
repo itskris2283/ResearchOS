@@ -57,7 +57,7 @@ export default function PapersPage() {
     setSubmittedQuery(searchQuery.trim());
   };
 
-  const bookmarkedPapers = papers.filter(p => (p._id || p.id) && bookmarkedIds.includes((p._id || p.id)!));
+  const bookmarkedPapers = papers.filter(p => p._id && bookmarkedIds.includes(p._id));
 
   const renderPaperList = (paperList: Paper[], emptyMessage: string) => {
     if (isLoading) {
@@ -80,7 +80,7 @@ export default function PapersPage() {
     return (
       <div className="space-y-2">
         {paperList.map((paper, i) => {
-          const paperId = paper._id || paper.id;
+          const paperId = paper._id;
           const isBookmarked = paperId ? bookmarkedIds.includes(paperId) : false;
           return (
             <motion.div key={paperId ?? i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>

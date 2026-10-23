@@ -2,7 +2,7 @@ import axios from "axios";
 import type { ApiResponse } from "@/types";
 
 const api = axios.create({
-  baseURL: "/api/v1",
+  baseURL: (import.meta.env.VITE_API_BASE_URL as string) || "/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -38,8 +38,8 @@ export async function apiPatch<T>(url: string, body?: any): Promise<ApiResponse<
   return data;
 }
 
-export async function apiDelete<T>(url: string): Promise<ApiResponse<T>> {
-  const { data } = await api.delete<ApiResponse<T>>(normalizeUrl(url));
+export async function apiDelete<T>(url: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
+  const { data } = await api.delete<ApiResponse<T>>(normalizeUrl(url), { params });
   return data;
 }
 

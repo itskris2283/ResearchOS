@@ -9,6 +9,23 @@ async def get_implementation_service():
     return ImplementationService()
 
 
+@router.get("/")
+async def list_implementations(
+    workspace_id: Optional[str] = Query(None),
+    paper_id: Optional[str] = Query(None),
+    service: ImplementationService = Depends(get_implementation_service),
+):
+    try:
+        result = await service.search_implementations(paper_id=paper_id, query=workspace_id)
+        return {
+            "status": "success",
+            "message": "Implementations retrieved",
+            "data": result,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.get("/search")
 async def search_implementations(
     paper_id: Optional[str] = Query(None),

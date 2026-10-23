@@ -12,6 +12,10 @@ import {
   ChevronRight,
   Moon,
   Sun,
+  Download,
+  Trash2,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,9 +23,49 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "@/contexts/ThemeContext";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import api, { apiDelete } from "@/lib/api";
 
 export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme();
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      // Use guest as default user_id for now
+      const response = await api.get("/workspaces/export/all", {
+        params: { user_id: "guest" },
+        responseType: "blob",
+      });
+      const blob = new Blob([response.data], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `researchos-export-guest-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Export downloaded");
+    } catch (error) {
+      toast.error("Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      await apiDelete("/workspaces/all", { user_id: "guest" });
+      toast.success("All data deleted");
+      // Force refresh
+      window.location.reload();
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -111,7 +155,19 @@ export default function SettingsPage() {
               <p className="text-sm font-medium">Export All Workspaces</p>
               <p className="text-xs text-muted-foreground">Download all your data as JSON</p>
             </div>
-            <Button variant="outline" size="sm">Export</Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
+              {exporting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Exporting…
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export
+                </>
+              )}
+            </Button>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -119,7 +175,29 @@ export default function SettingsPage() {
               <p className="text-sm font-medium text-destructive">Delete All Data</p>
               <p className="text-xs text-muted-foreground">Permanently remove all workspaces</p>
             </div>
-            <Button variant="destructive" size="sm">Delete</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete all data?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all your workspaces, papers, graphs, notes, and research data. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Yes, delete everything
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>

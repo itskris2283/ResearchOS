@@ -19,15 +19,20 @@ async def list_bookmarks(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+from pydantic import BaseModel
+
+class AddBookmarkRequest(BaseModel):
+    user_id: str
+    entity_type: str
+    entity_id: str
+
 @router.post("/")
 async def add_bookmark(
-    user_id: str,
-    entity_type: str,
-    entity_id: str,
+    body: AddBookmarkRequest,
     service: BookmarkService = Depends(get_bookmark_service),
 ):
     try:
-        bookmark = await service.add_bookmark(user_id, entity_type, entity_id)
+        bookmark = await service.add_bookmark(body.user_id, body.entity_type, body.entity_id)
         return {"status": "success", "message": "Bookmark added", "data": bookmark}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

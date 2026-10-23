@@ -38,3 +38,13 @@ export function useDeleteWorkspace() {
     },
   });
 }
+
+export function useWorkspaceProgress(workspaceId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ["workspace-progress", workspaceId],
+    queryFn: () => apiGet<{ stage: string; progress: number }>(`/workspaces/${workspaceId}/progress`),
+    enabled: enabled && !!workspaceId,
+    refetchInterval: 3000,
+    refetchOnWindowFocus: false,
+  });
+}

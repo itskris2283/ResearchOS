@@ -2,50 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  ResearchOS — "The Working Paper" design system
+
+  Palette (light / "Vellum"):
+    Vellum      #FBFBF5   page ground
+    Card White  #FFFFFF   surfaces
+    Iron Ink    #1C2433   text, primary buttons
+    Stamp Red   #B01E28   links, active markers, eyebrows
+    Highlighter #FFE86E   mark-moments only
+    Graphite    #66707F   secondary text
+
+  Type:
+    Display  STIX Two Text  (headings, serif titles)
+    Body     IBM Plex Sans  (UI, prose)
+    Data     IBM Plex Mono  (labels, counts, kbd)
+*/
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 60 24% 97%;
+    --foreground: 219 29% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 219 29% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --popover-foreground: 219 29% 15%;
+    --primary: 219 29% 15%;
+    --primary-foreground: 60 30% 97%;
+    --secondary: 55 20% 92%;
+    --secondary-foreground: 219 29% 18%;
+    --muted: 55 20% 93%;
+    --muted-foreground: 215 11% 45%;
+    --accent: 220 22% 94%;
+    --accent-foreground: 219 29% 15%;
+    --destructive: 355 71% 40%;
+    --destructive-foreground: 60 30% 98%;
+    --border: 52 13% 87%;
+    --input: 52 13% 82%;
+    --ring: 355 71% 40%;
+    --radius: 0.375rem;
+    --stamp: 355 71% 40%;
+    --stamp-foreground: 60 30% 98%;
+    --highlight: 50 100% 72%;
+    --highlight-foreground: 50 90% 12%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    /* "Carbon" — desaturated blue-slate, no neon */
+    --background: 222 23% 9%;
+    --foreground: 214 22% 91%;
+    --card: 222 21% 12%;
+    --card-foreground: 214 22% 91%;
+    --popover: 222 21% 13%;
+    --popover-foreground: 214 22% 91%;
+    --primary: 60 20% 95%;
+    --primary-foreground: 222 25% 11%;
+    --secondary: 222 15% 17%;
+    --secondary-foreground: 214 22% 91%;
+    --muted: 222 15% 16%;
+    --muted-foreground: 217 12% 63%;
+    --accent: 222 15% 19%;
+    --accent-foreground: 214 22% 91%;
+    --destructive: 355 78% 58%;
+    --destructive-foreground: 222 30% 8%;
+    --border: 222 13% 21%;
+    --input: 222 13% 25%;
+    --ring: 355 78% 58%;
+    --stamp: 355 80% 62%;
+    --stamp-foreground: 222 30% 8%;
+    --highlight: 50 85% 58%;
+    --highlight-foreground: 50 90% 10%;
   }
 }
 
@@ -53,20 +79,58 @@
   * {
     @apply border-border;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
-    font-family: "Inter", sans-serif;
+    @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif font-semibold tracking-tight;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply font-serif font-medium tracking-tight;
+  }
+
+  ::selection {
+    background: hsl(var(--highlight));
+    color: hsl(var(--highlight-foreground));
+  }
+
+  kbd {
+    @apply font-mono;
+  }
+
+  mark {
+    background: hsl(var(--highlight));
+    color: hsl(var(--highlight-foreground));
+    padding: 0 0.15em;
+    border-radius: 2px;
   }
 }
 
 @layer utilities {
+  /* Legacy glass utilities, re-materialed as flat paper surfaces */
   .glass {
-    @apply bg-background/80 backdrop-blur-xl border border-border/50;
+    @apply bg-background/90 backdrop-blur-md border-border/70;
   }
   .glass-card {
-    @apply bg-card/50 backdrop-blur-sm border border-border/50 shadow-sm;
+    @apply bg-card border border-border shadow-none;
   }
+
+  .eyebrow {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-stamp;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -82,13 +146,22 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/20 rounded-full;
+  @apply bg-muted-foreground/25 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/40;
+  @apply bg-muted-foreground/45;
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

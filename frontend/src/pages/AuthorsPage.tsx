@@ -51,7 +51,7 @@ export default function AuthorsPage() {
     !searchQuery || a.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const bookmarkedAuthors = filteredAuthors.filter(a => (a._id || a.id) && bookmarkedIds.includes((a._id || a.id)!));
+  const bookmarkedAuthors = filteredAuthors.filter(a => a._id && bookmarkedIds.includes(a._id));
 
   const renderAuthorList = (authorList: any[], emptyMessage: string) => {
     if (isLoading) {

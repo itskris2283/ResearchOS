@@ -1,7 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends, Body
+from typing import Optional
+from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends
 from app.services.discovery_service import DiscoveryService
 
 router = APIRouter()
+
+
+class DiscoverySearchRequest(BaseModel):
+    topic: Optional[str] = None
+    query: Optional[str] = None
+    limit: Optional[int] = 20
+
+
+class ExpandQueryRequest(BaseModel):
+    query: str
 
 
 async def get_discovery_service():
@@ -10,16 +22,17 @@ async def get_discovery_service():
 
 @router.post("/search")
 async def discovery_search(
-    topic: str = Body(...),
-    limit: int = Body(20),
+    body: DiscoverySearchRequest,
     service: DiscoveryService = Depends(get_discovery_service),
 ):
     try:
-        result = await service.discover_topic(topic, "")
+        topic_term = body.topic or body.query or ""
+        result = await service.discover_topic(topic_term, None)
+        papers = result.get("papers", []) if isinstance(result, dict) else result
         return {
             "status": "success",
             "message": "Discovery search complete",
-            "data": result,
+            "data": papers,
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -27,10 +40,10 @@ async def discovery_search(
 
 @router.post("/expand")
 async def expand_query(
-    query: str, service: DiscoveryService = Depends(get_discovery_service)
+    body: ExpandQueryRequest, service: DiscoveryService = Depends(get_discovery_service)
 ):
     try:
-        result = await service.expand_query(query)
+        result = await service.expand_query(body.query)
         return {
             "status": "success",
             "message": "Query expanded",

@@ -51,6 +51,35 @@ async def list_workspaces(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# Specific routes MUST come before /{workspace_id}
+@router.get("/export/all")
+async def export_all_workspaces(
+    user_id: str = Query(...), service: WorkspaceService = Depends(get_workspace_service)
+):
+    try:
+        data = await service.export_all_user_data(user_id)
+        from fastapi.responses import Response
+        import json
+        return Response(
+            content=json.dumps(data, default=str, indent=2),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=researchos-export-{user_id}.json"}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/all")
+async def delete_all_user_data(
+    user_id: str = Query(...), service: WorkspaceService = Depends(get_workspace_service)
+):
+    try:
+        await service.delete_all_user_data(user_id)
+        return {"status": "success", "message": "All user data deleted", "data": None}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.get("/{workspace_id}")
 async def get_workspace(
     workspace_id: str, service: WorkspaceService = Depends(get_workspace_service)

@@ -56,12 +56,14 @@ export default function App() {
           </ErrorBoundary>
           <Toaster
             position="bottom-right"
-            theme="dark"
             toastOptions={{
               style: {
-                background: "hsl(222.2 84% 4.9%)",
-                border: "1px solid hsl(217.2 32.6% 17.5%)",
-                color: "hsl(210 40% 98%)",
+                background: "hsl(219 29% 15%)",
+                border: "1px solid hsla(60, 30%, 97%, 0.14)",
+                color: "hsl(60 30% 97%)",
+                borderRadius: "6px",
+                fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+                fontSize: "13px",
               },
             }}
           />
